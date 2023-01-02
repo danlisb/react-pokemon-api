@@ -1,64 +1,60 @@
-import { useState } from "react";
+/*
+Consuma a API e liste todos os pokemons da consulta do seguinte endpoint. 
+https://pokeapi.co/api/v2/pokemon
+Você deve exibir, de cada pokémon:
+- imagem
+- nome
+- experiência
+Você pode acessar as informações de cada pokemón individualmente em:
+https://pokeapi.co/api/v2/pokemon/:id
+DICA:
+imagem => sprites.front_default
+experiência => base_experience
+EXTRA: se puder ordene por nome.
+*/
+
+import { useEffect, useState } from "react";
+import axios from "axios";
+import Pokemon from "./Pokemon";
 import "./App.css";
 
 function App() {
   const [list, setList] = useState([]);
-  const [undid, setUndid] = useState([]);
 
-  const handleClick = (event) => {
-    const newDot = {
-      clientX: event.clientX,
-      clientY: event.clientY,
-    };
+  // Ordem id (url)
+  // const fetchListData = () => {
+  //   axios
+  //     .get("https://pokeapi.co/api/v2/pokemon")
+  //     .then((response) => setList(response.data.results));
+  // };
 
-    console.log(newDot);
-    setList((prev) => [...prev, newDot]);
-    setUndid([]);
-  };
+  // Ordem alfábetica
+  const fetchListData = () => {
+    axios.get("https://pokeapi.co/api/v2/pokemon").then((response) => {
+      const sortedArray = [...response.data.results];
 
-  const handleUndo = (event) => {
-    event.stopPropagation();
-    console.log("Undo");
+      sortedArray.sort((a, b) => {
+        console.log({ a });
+        console.log({ b });
 
-    if (list.length === 0) {
-      return;
-    }
+        return a.name.localeCompare(b.name);
+      });
 
-    const lastItem = list[list.length - 1];
-    setUndid((prev) => [...prev, lastItem]);
-
-    setList((prev) => {
-      const newArr = [...prev].slice(0, -1);
-      return newArr;
+      console.log({ sortedArray });
+      setList(sortedArray);
     });
   };
 
-  const handleRedo = (event) => {
-    event.stopPropagation();
-    console.log("Redo");
-
-    if (undid.length === 0) {
-      return;
-    }
-
-    const recoveredDot = undid[undid.length - 1];
-    setUndid((prev) => {
-      const newArr = [...prev].slice(0, -1);
-      return newArr;
-    });
-    setList((prev) => [...prev, recoveredDot]);
-  };
+  useEffect(() => {
+    fetchListData();
+  }, []);
 
   return (
-    <div id="page" onClick={handleClick}>
-      <button onClick={handleUndo}>Desfazer</button>
-      <button onClick={handleRedo}>Refazer</button>
-      {list.map((item, index) => (
-        <span
-          key={index}
-          className="dot"
-          style={{ left: item.clientX, top: item.clientY }}
-        />
+    <div>
+      <h3>Desafio Consumir API Pokémon</h3>
+      <hr />
+      {list.map((item) => (
+        <Pokemon key={item.name} data={item} />
       ))}
     </div>
   );
